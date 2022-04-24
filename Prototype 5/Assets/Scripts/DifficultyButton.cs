@@ -1,5 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/*
+ * Jaden Pleasants
+ * Assignment 8
+ * Script for setting the game's difficulty
+ */
 using UnityEngine;
 using UnityEngine.UI;
 

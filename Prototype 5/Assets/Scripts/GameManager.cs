@@ -1,4 +1,10 @@
-﻿using System.Collections;
+﻿/*
+ * Jaden Pleasants
+ * Assignment 8
+ * Manages most of the game state I guess
+ * I have a headache rn so be forewarned my comments are gonna be hot garbage
+ */
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
