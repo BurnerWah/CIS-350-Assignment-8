@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    "**/Library/cache": true,
+    "**/Library/metadata": true,
+    "**/Library/PackageCache": true,
+    "**/Library/ScriptAssemblies": true,
+    "**/Library/ShaderCache": true,
+    "**/Library/StateCache": true
+  }
+}
