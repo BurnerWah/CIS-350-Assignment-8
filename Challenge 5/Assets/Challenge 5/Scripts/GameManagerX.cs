@@ -1,90 +1,88 @@
-﻿using System.Collections;
+﻿/*
+ * Jaden Pleasants
+ * Assignment 8
+ * Manages game staate
+ */
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameManagerX : MonoBehaviour
-{
+public class GameManagerX : Singleton<GameManagerX> {
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI gameOverText;
+    public TextMeshProUGUI timeText;
     public GameObject titleScreen;
-    public Button restartButton; 
-
+    public Button restartButton;
     public List<GameObject> targetPrefabs;
 
     private int score;
+    public int Score {
+        get => score;
+        set {
+            score = value;
+            scoreText.text = $"Score: {score}";
+        }
+    }
     private float spawnRate = 1.5f;
-    public bool isGameActive;
+    private bool isGameActive;
+    public static bool IsGameActive => Instance.isGameActive;
 
-    private float spaceBetweenSquares = 2.5f; 
-    private float minValueX = -3.75f; //  x value of the center of the left-most square
-    private float minValueY = -3.75f; //  y value of the center of the bottom-most square
-    
-    // Start the game, remove title screen, reset score, and adjust spawnRate based on difficulty button clicked
-    public void StartGame()
-    {
-        spawnRate /= 5;
+    private readonly float spaceBetweenSquares = 2.5f;
+    private readonly float minValueX = -3.75f;
+    private readonly float minValueY = -3.75f;
+
+    public void StartGame(DifficultyLevel difficulty = DifficultyLevel.Easy) {
+        spawnRate /= (int)difficulty;
         isGameActive = true;
         StartCoroutine(SpawnTarget());
-        score = 0;
-        UpdateScore(0);
+        StartCoroutine(TimeHandlerThing());
+        Score = 0;
         titleScreen.SetActive(false);
     }
 
-    // While game is active spawn a random target
-    IEnumerator SpawnTarget()
-    {
-        while (isGameActive)
-        {
+    IEnumerator SpawnTarget() {
+        while (isGameActive) {
             yield return new WaitForSeconds(spawnRate);
-            int index = Random.Range(0, targetPrefabs.Count);
+            var index = Random.Range(0, targetPrefabs.Count);
 
-            if (isGameActive)
-            {
-                Instantiate(targetPrefabs[index], RandomSpawnPosition(), targetPrefabs[index].transform.rotation);
+            if (isGameActive) {
+                Instantiate(targetPrefabs[index],
+                            RandomSpawnPosition,
+                            targetPrefabs[index].transform.rotation);
             }
-            
         }
     }
 
-    // Generate a random spawn position based on a random index from 0 to 3
-    Vector3 RandomSpawnPosition()
-    {
-        float spawnPosX = minValueX + (RandomSquareIndex() * spaceBetweenSquares);
-        float spawnPosY = minValueY + (RandomSquareIndex() * spaceBetweenSquares);
-
-        Vector3 spawnPosition = new Vector3(spawnPosX, spawnPosY, 0);
-        return spawnPosition;
-
+    IEnumerator TimeHandlerThing() {
+        int timeLeft = 60;
+        timeText.text = $"Time: {timeLeft}";
+        while (isGameActive) {
+            yield return new WaitForSeconds(1);
+            if (isGameActive) {
+                timeText.text = $"Time: {--timeLeft}";
+                if (timeLeft == 0) {
+                    GameOver();
+                }
+            }
+        }
     }
 
-    // Generates random square index from 0 to 3, which determines which square the target will appear in
-    int RandomSquareIndex()
-    {
-        return Random.Range(0, 4);
-    }
+    Vector3 RandomSpawnPosition => new Vector3(minValueX + (SquareIndex * spaceBetweenSquares),
+                                               minValueY + (SquareIndex * spaceBetweenSquares),
+                                               0);
 
-    // Update score with value from target clicked
-    public void UpdateScore(int scoreToAdd)
-    {
-        score += scoreToAdd;
-        scoreText.text = "score";
-    }
+    int SquareIndex => Random.Range(0, 4);
 
-    // Stop game, bring up game over text and restart button
-    public void GameOver()
-    {
+    public void UpdateScore(int scoreToAdd) => Score += scoreToAdd;
+
+    public void GameOver() {
         gameOverText.gameObject.SetActive(true);
-        restartButton.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(true);
         isGameActive = false;
     }
 
-    // Restart game by reloading the scene
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
+    public void RestartGame() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 }
